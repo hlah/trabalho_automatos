@@ -33,6 +33,8 @@ OBJS=$(patsubst %,$(ODIR)/%,$(_OBJS))
 
 # build objects and lib
 all: build-main
+Release: all
+Debug: all
 
 # build a test
 $(TDIR)/%: $(TDIR)/%.cpp $(OBJS) 
