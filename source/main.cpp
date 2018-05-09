@@ -6,9 +6,15 @@
 
 int main(int argc, char** argv) {
 
+
 	// lê opções
 	Options opts;
 	opts.le_argumentos(argc, argv);
+
+	if(argc <= 1) {
+		opts.uso();
+	}
+
 
 	GLC glc;
 
@@ -23,7 +29,7 @@ int main(int argc, char** argv) {
 	
 
 	// exibe gramática
-	if( glc.aberto() ) {
+	if( glc.aberto() && opts.exibir() ) {
 		glc.exibe();
 	}
 	
