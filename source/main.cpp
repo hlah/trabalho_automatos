@@ -10,13 +10,22 @@ int main(int argc, char** argv) {
 	Options opts;
 	opts.le_argumentos(argc, argv);
 
-	// carrega gramática
-	
+	GLC glc;
 
+	// carrega gramática
+	if( opts.glc_entrada().size() != 0 ) {
+		glc.carrega_arquivo(opts.glc_entrada());
+	}
 	// simplifica
 	
 
 	// normaliza
+	
+
+	// exibe gramática
+	if( glc.aberto() ) {
+		glc.exibe();
+	}
 	
 
 	// verifica

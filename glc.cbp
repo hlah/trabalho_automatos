@@ -12,6 +12,7 @@
 				<Option object_output="bin/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="teste.txt" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -22,6 +23,7 @@
 		</Compiler>
 		<Unit filename="include/glc.h" />
 		<Unit filename="include/options.h" />
+		<Unit filename="source/glc.cpp" />
 		<Unit filename="source/main.cpp" />
 		<Unit filename="source/options.cpp" />
 		<Extensions>

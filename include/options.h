@@ -6,12 +6,12 @@
 class Options {
 	public:
 		// obtém opções
-		bool simplificar() const;
-		bool normalizar() const;
-		bool verificar() const;
-		const std::string& glc_entrada() const;
-		const std::string& glc_saida() const;
-		const std::string& string_entrada() const;
+		inline bool simplificar() const { return _simplificar; };
+		inline bool normalizar() const { return _normalizar; };
+		inline bool verificar() const { return _verificar; };
+		inline const std::string& glc_entrada() const { return _glc_entrada; };
+		inline const std::string& glc_saida() const { return _glc_saida; };
+		inline const std::string& string_entrada() const { return _string_entrada; };
 		// lê argumentos
 		bool le_argumentos(int argc, char** argv);
 	private:
