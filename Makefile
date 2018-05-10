@@ -28,7 +28,7 @@ DFLAGS=-MT $(foreach TMP,$(SDIR) $(TDIR),$(patsubst $(TMP)/%.cpp, $(ODIR)/%.o, $
 LIBS=
 
 # Object list (derived from source directory)
-_OBJS=$(patsubst $(SDIR)/%.cpp, %.o, $(shell shopt -s nullglob && echo $(SDIR)/*.cpp))
+_OBJS=$(patsubst $(SDIR)/%.cpp, %.o, $(wildcard $(SDIR)/*.cpp))
 OBJS=$(patsubst %,$(ODIR)/%,$(_OBJS))
 
 # build objects and lib

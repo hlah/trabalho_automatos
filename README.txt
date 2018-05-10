@@ -1,12 +1,13 @@
 ======== Autores =========
-Guilherme
-Gustavo
-Mateus Davi Simon	00209411
+Guilherme erlezi de Quadros 00230326
+Gustavo Oliva Barnasque		00263056
+Mateus Davi Simon			00209411
 
 
 ======= Compilação =======
 make 
 executável salvo na pasta "bin/"
+
 
 ========== Uso ===========
 glc arquivo_de_entrada [arquivo_de_saida] [opcoes]
