@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <set>
 
 class GLC {
 	public:
@@ -43,6 +44,10 @@ class GLC {
 		// contador de terminais e variaveis
 		int _term_contador = 0;
 		int _vars_contador = 0;
+		// conjunto de variaveis
+		std::set<int> _variaveis;
+		// conjunto de terminais
+		std::set<int> _terminais;
 		// mapas
 		std::map<int,std::string> _int_para_term;
 		std::map<std::string,int> _term_para_int;

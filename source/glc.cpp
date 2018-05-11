@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+///////////// CARREGAMENTO E EXIBIÇÃO //////////////
+
 // carrega GLC de arquivo
 bool GLC::carrega_arquivo(std::string arquivo_str) {
 	bool success = false;
@@ -21,6 +23,8 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 	_aberto = false;
 	_term_contador = 0;
 	_vars_contador = 0;
+	_variaveis.clear();
+	_terminais.clear();
 	_int_para_term.clear();
 	_term_para_int.clear();
 	_int_para_var.clear();
@@ -67,6 +71,8 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 						// cria mapas
 						_term_para_int[terminal] = -(++_term_contador);
 						_int_para_term[-_term_contador] = terminal;
+						// adiciona terminal
+						_terminais.insert(_term_para_int[terminal]);
 					}
 				}
 				// checa próxima seção
@@ -86,6 +92,8 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 						// cria mapas
 						_var_para_int[variavel] = _vars_contador;
 						_int_para_var[_vars_contador++] = variavel;
+						// adiciona variavel
+						_variaveis.insert(_var_para_int[variavel]);
 					}
 				}
 				// checa próxima seção
@@ -160,35 +168,8 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 			}
 		}
 
+		// checa erro
 		success = !erro;
-
-		/*
-		std::cout << "Mapa inteiros para terminais:\n";
-		for( auto it = _int_para_term.begin(); it!=_int_para_term.end(); it++ )
-			std::cout << it->first << ": " << it->second << "\n";
-		std::cout << "Mapa terminais para inteiros:\n";
-		for( auto it = _term_para_int.begin(); it!=_term_para_int.end(); it++ )
-			std::cout << it->first << ": " << it->second << "\n";
-		std::cout << "Mapa inteiros para variaveis:\n";
-		for( auto it = _int_para_var.begin(); it!=_int_para_var.end(); it++ )
-			std::cout << it->first << ": " << it->second << "\n";
-		std::cout << "Mapa variaveis para inteiros:\n";
-		for( auto it = _var_para_int.begin(); it!=_var_para_int.end(); it++ )
-			std::cout << it->first << ": " << it->second << "\n";
-		// */
-
-		/*
-		for( int i=0; i<_vars_contador; i++ ) {
-			for( auto prod : _regras[i] ) {
-				std::cout <<  "\t " << i << " -> ";
-				for( int simbolo : prod ) {
-					std::cout << simbolo << " ";
-				}
-				std::cout << "\n";
-			}
-		}
-		*/
-		
 
 		// fecha arquivo
 		arquivo.close();
@@ -205,24 +186,22 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 bool GLC::exibe() {
 	std::cout << "GLC = (T, V, S, P)\nT = { ";
 	// exibe terminais
-	for(int i=1; i<_term_contador; i++) {
-		std::cout << _int_para_term[-i] << ", ";
+	for( auto term : _terminais ) {
+		std::cout << _int_para_term[term] << ", ";
 	}
-	std::cout << _int_para_term[-_term_contador];
 	std::cout << "}\nV = { ";
 	// exibe variaveis
-	for(int i=0; i<_vars_contador-1; i++) {
-		std::cout << _int_para_var[i] << ", ";
+	for( auto var : _variaveis ) {
+		std::cout << _int_para_var[var] << ", ";
 	}
-	std::cout << _int_para_var[_vars_contador-1];
 	std::cout << "}\nS = ";
 	// exibe inicial
 	std::cout << _int_para_var[0] << "\n";
 	// exibe programa
 	std::cout << "P = { \n";
-	for( int i=0; i<_vars_contador; i++ ) {
-		for( auto prod : _regras[i] ) {
-			std::cout <<  "\t " << _int_para_var[i] << " -> ";
+	for( auto var : _variaveis ) {
+		for( auto prod : _regras[var] ) {
+			std::cout <<  "\t " << _int_para_var[var] << " -> ";
 			// checa se vazio 
 			if( prod.size() == 0 ) {
 				std::cout << _vazio;
@@ -268,7 +247,9 @@ void GLC::remove_prod_vazias() {
 void GLC::remove_subst_vars() {
 	std::cout << "Remoção de substituição de variaveis não implementada.\n";
 }
-// etapa 3: removção de símbolos inuteis
+// etapa 3: remoção de símbolos inuteis
 void GLC::remove_simb_inuteis() {
-	std::cout << "Remoção de símbolos inúteis não implementada.\n";
+	// etapa 1: qualquer variavel gera terminais
+	
+	// etapa 2: qualquer símbolo é atingível a partir do símbolo inicial
 }
