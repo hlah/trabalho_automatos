@@ -24,6 +24,14 @@ class GLC {
 		// checa se gramática está na forma normal de Chomsky
 		bool normalizada();
 	private:
+		// funções privadas:
+		//// SIMPLIFICAÇÃO
+		// etapa 1: remoção de produções vazias
+		void remove_prod_vazias();
+		// etapa 2: remoção de substituição de variaveis
+		void remove_subst_vars();
+		// etapa 3: removção de símbolos inuteis
+		void remove_simb_inuteis();
 		// enumerador para o estado de leitura
 		enum Estado {
 			INICIO,

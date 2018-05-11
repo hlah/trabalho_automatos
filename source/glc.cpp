@@ -18,6 +18,7 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 		FINAL
 	};
 	// limpa variaveis
+	_aberto = false;
 	_term_contador = 0;
 	_vars_contador = 0;
 	_int_para_term.clear();
@@ -238,4 +239,36 @@ bool GLC::exibe() {
 	}
 	std::cout << "}\n";
 
+}
+
+//////////////// SIMPLIFICAÇAO ///////////////////
+
+// simplifica o GLC
+bool GLC::simplifica() {
+	// verifica arquivo aberto
+	if( !_aberto ) {
+		std::cout << "ERRO: nenhum GLC aberto para simplificação.\n";
+		return false;
+	}
+	// etapa 1
+	remove_prod_vazias();
+	// etapa 2
+	remove_subst_vars();
+	// etapa 3
+	remove_simb_inuteis();
+
+	return true;
+}
+
+// etapa 1: remoção de produções vazias
+void GLC::remove_prod_vazias() {
+	std::cout << "Remoção de produções vazias não implementada.\n";
+}
+// etapa 2: remoção de substituição de variaveis
+void GLC::remove_subst_vars() {
+	std::cout << "Remoção de substituição de variaveis não implementada.\n";
+}
+// etapa 3: removção de símbolos inuteis
+void GLC::remove_simb_inuteis() {
+	std::cout << "Remoção de símbolos inúteis não implementada.\n";
 }

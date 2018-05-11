@@ -23,6 +23,9 @@ int main(int argc, char** argv) {
 		glc.carrega_arquivo(opts.glc_entrada());
 	}
 	// simplifica
+	if( opts.simplificar() ) {
+		glc.simplifica();
+	}
 	
 
 	// normaliza
