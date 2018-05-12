@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <regex>
+#include <algorithm>
 
 #include <iostream>
 
@@ -250,6 +251,120 @@ void GLC::remove_subst_vars() {
 // etapa 3: remoção de símbolos inuteis
 void GLC::remove_simb_inuteis() {
 	// etapa 1: qualquer variavel gera terminais
-	
+	std::set<int> variaveis_v1;
+	int prev_tamanho;
+	// até V1 não aumentar de tamanho
+	do {
+		prev_tamanho = variaveis_v1.size();
+		for( const auto& producoes : _regras ) {
+			// não precisa checar variaveis já adicionadas
+			if( variaveis_v1.count(producoes.first) == 0 ) {
+				bool achou = false;
+				// para cada produção
+				for( const auto& prod : producoes.second ) {
+					// verifica se possui terminal ou variavel em V1
+					for( auto simbolo : prod ) {
+						if( simbolo < 0 || variaveis_v1.count(simbolo) != 0 ) {
+							achou = false;
+							variaveis_v1.insert(producoes.first);
+							break;
+						}
+					}
+					if(achou)
+						break;
+				}
+			}
+		}
+	} while ( prev_tamanho < variaveis_v1.size() );
+	// atualiza variaveis
+	atualiza_variaveis(variaveis_v1);
+
 	// etapa 2: qualquer símbolo é atingível a partir do símbolo inicial
+	std::set<int> variaveis_v2{0};
+	std::set<int> terminais_t2;
+	int v2_prev_tamanho;
+	int t2_prev_tamanho;
+	// até V2 e T2 não aumentarem de tamanho
+	do {
+		v2_prev_tamanho = variaveis_v2.size();
+		t2_prev_tamanho = terminais_t2.size();
+		// checa símbolos atingiveis a partir de variaveis em V2
+		for( auto var : variaveis_v2 ) {
+			// para cada produção 
+			for( auto prod : _regras[var] ) {
+				// adiciona os símbolos atingiveis
+				for( auto simbolo : prod ) {
+					if( simbolo < 0 ) {
+						// terminal
+						terminais_t2.insert(simbolo);
+					} else {
+						// variavel
+						variaveis_v2.insert(simbolo);
+					}
+				}
+			}
+		}
+	} while ( v2_prev_tamanho < variaveis_v2.size() || t2_prev_tamanho < terminais_t2.size() );
+	// atualiz variaveis e terminais
+	atualiza_variaveis(variaveis_v2);
+	atualiza_terminais(terminais_t2);
+
+}
+
+
+//////////////// AUXILIARES /////////////////////
+
+// remove símbolo (e todas as produções que à contém)
+void GLC::remove_simbolo(int simbolo) {
+	// remove do respectivo conjunto e mapas
+	if( simbolo < 0 ) {
+		_terminais.erase(simbolo);
+		auto str = _int_para_term[simbolo];
+		_term_para_int[str];
+		_int_para_term[simbolo];
+	} else {
+		_variaveis.erase(simbolo);
+		auto str = _int_para_var[simbolo];
+		_var_para_int[str];
+		_int_para_var[simbolo];
+	}
+	// remove produções
+	_regras.erase(simbolo);
+	for( auto& producoes : _regras ) {
+		// checa se produção contém símbolo
+		for( auto prod = producoes.second.begin(); prod != producoes.second.end(); ) {
+			if( std::find( prod->begin(), prod->end(), simbolo ) != prod->end() ) {
+				producoes.second.erase(prod);
+			} else {
+				prod++;
+			}
+
+		}
+	}
+}
+
+// atualiza variaveis (remove variaveis que não estão no conjunto dado)
+void GLC::atualiza_variaveis( const std::set<int>& v1 ) {
+	for( auto var = _variaveis.cbegin(); var != _variaveis.cend(); ) {
+		if( v1.count(*var) == 0 ) {
+			auto remover = *var;
+			var++;
+			remove_simbolo(remover);
+		} else {
+			var++;
+		}
+	}
+}
+
+// atualiza variaveis (remove variaveis que não estão no conjunto dado)
+void GLC::atualiza_terminais( const std::set<int>& t1 ) {
+	for( auto term = _terminais.cbegin(); term != _terminais.cend(); ) {
+		if( t1.count(*term) == 0 ) {
+			auto remover = *term;
+			term++;
+			remove_simbolo(remover);
+		} else {
+			term++;
+		}
+	}
 }

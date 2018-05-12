@@ -33,6 +33,12 @@ class GLC {
 		void remove_subst_vars();
 		// etapa 3: removção de símbolos inuteis
 		void remove_simb_inuteis();
+		//// AUXLIARES
+		// remove símbolo (e todas as produções que à contém)
+		void remove_simbolo(int simbolo);
+		// atualiza variaveis (remove variaveis que não estão no conjunto dado)
+		void atualiza_variaveis( const std::set<int>& v1 );
+		void atualiza_terminais( const std::set<int>& t1 ); 
 		// enumerador para o estado de leitura
 		enum Estado {
 			INICIO,
