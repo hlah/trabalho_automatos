@@ -203,7 +203,7 @@ bool GLC::exibe() {
 	for( auto var : _variaveis ) {
 		for( auto prod : _regras[var] ) {
 			std::cout <<  "\t " << _int_para_var[var] << " -> ";
-			// checa se vazio 
+			// checa se vazio
 			if( prod.size() == 0 ) {
 				std::cout << _vazio;
 			}
@@ -242,7 +242,78 @@ bool GLC::simplifica() {
 
 // etapa 1: remoção de produções vazias
 void GLC::remove_prod_vazias() {
-	std::cout << "Remoção de produções vazias não implementada.\n";
+
+    // etapa  1: variveis que constituem produções vazias
+	std::set<int> variaveis_ve;
+	// Inicializa Ve
+	for( const auto& producoes : _regras ) {
+        // Para toda produção
+        for( const auto& prod : producoes.second ) {
+            // Se tiver tamanho zero é produção vazia
+            if( prod.size() == 0 ) {
+                variaveis_ve.insert(producoes.first);
+            }
+        }
+	}
+
+	int ve_prev_tamanho;
+	// Até Ve não aumentar de tamanho
+	do {
+        ve_prev_tamanho = variaveis_ve.size();
+        for( const auto& producoes : _regras ) {
+            // para todas produções
+            for( const auto& prod : producoes.second ) {
+                // procura as que geram simbolo vazio por tabela
+                for( auto simbolo : prod) {
+                    if( variaveis_ve.count(simbolo) != 0) {
+                        variaveis_ve.insert(producoes.first);
+                    }
+                }
+            }
+        }
+	} while( ve_prev_tamanho < variaveis_ve.size() );
+
+	// etapa 2: exclusão de produções vazias
+    std::map<int,std::vector<std::vector<int>>> producoes_p1 = _regras;
+
+    // Inicializa P1
+    // Para cada variavel de Ve
+    for( auto var : variaveis_ve ) {
+        // Para todas produções das variaveis de Ve
+         int i=0;
+        for( auto prod : producoes_p1[var]) {
+            // Deleta se gera palavra vazia
+            if( prod.size() == 0 ) {
+                producoes_p1[var].erase(producoes_p1[var].begin() + i);
+            }
+            i++;
+        }
+    }
+
+    int p1_tamanho;
+    do {
+        p1_tamanho = producoes_p1.size();
+        for( auto& producao : producoes_p1) {
+            for( auto& prod : producao.second) {
+                int i=0;
+                for( auto& simbolo : prod) {
+                    if(variaveis_ve.count(simbolo) != 0) {
+                        auto& dummy = prod;
+                        dummy.erase(dummy.begin() + i);
+                        if(dummy.size() != 0) {
+
+                            producao.second.push_back(dummy);
+                        }
+                    }
+                    i++;
+                }
+            }
+        }
+
+    } while( p1_tamanho < producoes_p1.size() );
+
+    _regras = producoes_p1;
+    this->exibe();
 }
 // etapa 2: remoção de substituição de variaveis
 void GLC::remove_subst_vars() {
@@ -290,7 +361,7 @@ void GLC::remove_simb_inuteis() {
 		t2_prev_tamanho = terminais_t2.size();
 		// checa símbolos atingiveis a partir de variaveis em V2
 		for( auto var : variaveis_v2 ) {
-			// para cada produção 
+			// para cada produção
 			for( auto prod : _regras[var] ) {
 				// adiciona os símbolos atingiveis
 				for( auto simbolo : prod ) {
