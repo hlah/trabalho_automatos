@@ -184,7 +184,7 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 }
 
 // exibe GLC na tela
-bool GLC::exibe() {
+void GLC::exibe() {
 	std::cout << "GLC = (T, V, S, P)\nT = { ";
 	// exibe terminais
 	for( auto term : _terminais ) {
@@ -264,56 +264,68 @@ void GLC::remove_prod_vazias() {
             // para todas produções
             for( const auto& prod : producoes.second ) {
                 // procura as que geram simbolo vazio por tabela
+				bool gera_vazio = true;
                 for( auto simbolo : prod) {
-                    if( variaveis_ve.count(simbolo) != 0) {
-                        variaveis_ve.insert(producoes.first);
+                    if( variaveis_ve.count(simbolo) == 0) {
+						// encontrou simbolo que não pertence a Ve
+						gera_vazio = false;
+						break;
                     }
                 }
+				if( gera_vazio ) {
+					// insere cabeça em Ve
+					variaveis_ve.insert(producoes.first);
+					break;
+				}
             }
         }
 	} while( ve_prev_tamanho < variaveis_ve.size() );
 
 	// etapa 2: exclusão de produções vazias
-    std::map<int,std::vector<std::vector<int>>> producoes_p1 = _regras;
+    std::map<int,std::vector<std::vector<int>>> producoes_p1;
 
     // Inicializa P1
-    // Para cada variavel de Ve
-    for( auto var : variaveis_ve ) {
-        // Para todas produções das variaveis de Ve
-         int i=0;
-        for( auto prod : producoes_p1[var]) {
-            // Deleta se gera palavra vazia
-            if( prod.size() == 0 ) {
-                producoes_p1[var].erase(producoes_p1[var].begin() + i);
-            }
-            i++;
-        }
-    }
+	// insere produções não vazias
+	for( const auto& producoes : _regras ) {
+		for( const auto& prod : producoes.second ) {
+			if( prod.size() != 0 ) {
+				producoes_p1[producoes.first].push_back(prod);
+			}
+		}
+	}
 
-    int p1_tamanho;
-    do {
-        p1_tamanho = producoes_p1.size();
-        for( auto& producao : producoes_p1) {
-            for( auto& prod : producao.second) {
-                int i=0;
-                for( auto& simbolo : prod) {
-                    if(variaveis_ve.count(simbolo) != 0) {
-                        auto& dummy = prod;
-                        dummy.erase(dummy.begin() + i);
-                        if(dummy.size() != 0) {
+	// até P1 não aumentar de tamanho
+	int p1_prev_tamanho;
+	do {
+		p1_prev_tamanho = producoes_p1.size();
+		// para cada variavel com producoes
+		for( auto& producoes : producoes_p1 ) {
+			size_t producoes_size = producoes.second.size();
+			// para cada producoes
+			for( int i=0; i<producoes_size; i++) {
+				// para cada simbolo
+				for( auto simbolo_it=producoes.second[i].begin(); simbolo_it != producoes.second[i].end(); simbolo_it++) {
+					// se simbolo em Ve (produz palavra vazia)
+					if( variaveis_ve.count(*simbolo_it) != 0  && producoes.second[i].size() >= 2) {
+						// cria nova producao
+						std::vector<int> nova_prod( producoes.second[i].begin(), simbolo_it );
+						nova_prod.insert(nova_prod.end(), simbolo_it+1, producoes.second[i].end());
+						// adiciona as regras
+						producoes.second.push_back(nova_prod);
+						producoes_size++;
+					}
+				}
+			}
+		}
+	} while( p1_prev_tamanho < producoes_p1.size() );
 
-                            producao.second.push_back(dummy);
-                        }
-                    }
-                    i++;
-                }
-            }
-        }
 
-    } while( p1_tamanho < producoes_p1.size() );
+	// etapa 3: adiciona produção vazia de necesário
+	if( variaveis_ve.count(0) > 0 ) {
+		producoes_p1[0].push_back({});
+	}
 
     _regras = producoes_p1;
-    this->exibe();
 }
 // etapa 2: remoção de substituição de variaveis
 void GLC::remove_subst_vars() {

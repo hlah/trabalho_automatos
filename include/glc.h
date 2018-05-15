@@ -13,7 +13,7 @@ class GLC {
 		// salva GLC em arquivo
 		bool salva_arquivo(std::string arquivo_str);
 		// exibe GLC na tela
-		bool exibe();
+		void exibe();
 		// simplifica o GLC
 		bool simplifica();
 		// converte para forma normal de Chomsky
