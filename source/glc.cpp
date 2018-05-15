@@ -163,7 +163,7 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 							producao = m.suffix().str();
 						}
 						// adiciona produção
-						_regras[cabeca_it->second].push_back(simbolos);
+						_regras[cabeca_it->second].insert(simbolos);
 					}
 				}
 			}
@@ -282,14 +282,14 @@ void GLC::remove_prod_vazias() {
 	} while( ve_prev_tamanho < variaveis_ve.size() );
 
 	// etapa 2: exclusão de produções vazias
-    std::map<int,std::vector<std::vector<int>>> producoes_p1;
+    std::map<int,std::set<std::vector<int>>> producoes_p1;
 
     // Inicializa P1
 	// insere produções não vazias
 	for( const auto& producoes : _regras ) {
 		for( const auto& prod : producoes.second ) {
 			if( prod.size() != 0 ) {
-				producoes_p1[producoes.first].push_back(prod);
+				producoes_p1[producoes.first].insert(prod);
 			}
 		}
 	}
@@ -302,16 +302,16 @@ void GLC::remove_prod_vazias() {
 		for( auto& producoes : producoes_p1 ) {
 			size_t producoes_size = producoes.second.size();
 			// para cada producoes
-			for( int i=0; i<producoes_size; i++) {
+			for( auto& prod : producoes.second ) {
 				// para cada simbolo
-				for( auto simbolo_it=producoes.second[i].begin(); simbolo_it != producoes.second[i].end(); simbolo_it++) {
+				for( auto simbolo_it= prod.begin(); simbolo_it !=  prod.end(); simbolo_it++) {
 					// se simbolo em Ve (produz palavra vazia)
-					if( variaveis_ve.count(*simbolo_it) != 0  && producoes.second[i].size() >= 2) {
+					if( variaveis_ve.count(*simbolo_it) != 0  &&  prod.size() >= 2) {
 						// cria nova producao
-						std::vector<int> nova_prod( producoes.second[i].begin(), simbolo_it );
-						nova_prod.insert(nova_prod.end(), simbolo_it+1, producoes.second[i].end());
+						std::vector<int> nova_prod(  prod.begin(), simbolo_it );
+						nova_prod.insert(nova_prod.end(), simbolo_it+1,  prod.end());
 						// adiciona as regras
-						producoes.second.push_back(nova_prod);
+						producoes.second.insert(nova_prod);
 						producoes_size++;
 					}
 				}
@@ -322,7 +322,7 @@ void GLC::remove_prod_vazias() {
 
 	// etapa 3: adiciona produção vazia de necesário
 	if( variaveis_ve.count(0) > 0 ) {
-		producoes_p1[0].push_back({});
+		producoes_p1[0].insert({});
 	}
 
     _regras = producoes_p1;

@@ -60,7 +60,7 @@ class GLC {
 		std::map<int,std::string> _int_para_var;
 		std::map<std::string,int> _var_para_int;
 		// regras
-		std::map<int,std::vector<std::vector<int>>> _regras;
+		std::map<int,std::set<std::vector<int>>> _regras;
 		// símbolo vazio
 		const std::string _vazio = "V";
 		// booleanos

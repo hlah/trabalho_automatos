@@ -1,0 +1,20 @@
+#Terminais
+[ a ]
+[ b ]
+#Variaveis
+[ A ]
+[ B ]
+[ Y ]
+[ X ]
+[ S ]
+#Inicial
+[ S ]
+#Regras
+[ S ] > [ A ] [ B ]
+[ S ] > [ A ] [ X ] [ Y ] [ B ]
+[ A ] > [ a ]
+[ B ] > [ b ]
+[ X ] > [ V ]
+[ Y ] > [ V ]
+[ X ] > [ a ]
+[ Y ] > [ b ]
