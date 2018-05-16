@@ -329,8 +329,75 @@ void GLC::remove_prod_vazias() {
 }
 // etapa 2: remoção de substituição de variaveis
 void GLC::remove_subst_vars() {
-	std::cout << "Remoção de substituição de variaveis não implementada.\n";
+
+	// fechos
+	std::map<int,std::set<int>> fechos;
+
+	// Etapa 1: fecho transitivo de cada variavel
+
+	// para A pertencente a V
+	for( auto A : _variaveis ) {
+		// adiciona transicoes A -> B
+		for( const auto& prod : _regras[A] ) {
+			// se produção é da for A -> B
+			if( prod.size() == 1 && prod[0] >= 0 ) {
+				// adicina ao fecho
+				fechos[A].insert(prod[0]);
+			}
+		}
+		// adiciona próximas transições até fecho não aumentar
+		int fecho_A_tamanho;
+		do {
+			fecho_A_tamanho = fechos[A].size();
+			// para todas variaveis já no fecho
+			for( auto B : fechos[A] ) {
+				// suas produções
+				for( const auto& prod : _regras[A] ) {
+					// no formato B -> C
+					if( prod.size() == 1 && prod[0] >= 0 ) {
+						// adicina ao fecho
+						fechos[A].insert(prod[0]);
+					}
+				}
+			}
+		} while( fecho_A_tamanho < fechos[A].size() );
+	}
+
+	// Etapa 2: exclusão das produções que substituem variaveis
+
+	// P1
+	std::map<int,std::set<std::vector<int>>> producoes_p1;
+
+	// inicializa P1
+	for( const auto& producoes : _regras ) {
+		for( const auto& prod : producoes.second ) {
+			// se produção não for no formato A -> B
+			if( prod.size() != 1 || prod[0] < 0 ) {
+				// adiciona a P1
+				producoes_p1[producoes.first].insert(prod);
+			}
+		}
+	}
+
+	// para todo A pertencente a V
+	for( auto A : _variaveis ) {
+		// para todo B pertencente ao fecho de A
+		for( auto B : fechos[A]  ) {
+			// para todas produções de B
+			for( const auto& prod : _regras[B] ) {
+				// que não estão no formato B -> C
+				if( prod.size() != 1 || prod[0] < 0 ) {
+					// adiciona a P1
+					producoes_p1[A].insert(prod);
+				}
+			}
+		}
+	}
+
+	// atualiza regras
+	_regras = producoes_p1;
 }
+
 // etapa 3: remoção de símbolos inuteis
 void GLC::remove_simb_inuteis() {
 	// etapa 1: qualquer variavel gera terminais
