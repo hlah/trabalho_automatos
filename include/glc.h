@@ -25,7 +25,7 @@ class GLC {
 		// checa se gramática está na forma normal de Chomsky
 		bool normalizada();
 	private:
-		// funções privadas:
+		///// METODOS PRIVADOS /////
 		//// SIMPLIFICAÇÃO
 		// etapa 1: remoção de produções vazias
 		void remove_prod_vazias();
@@ -39,14 +39,9 @@ class GLC {
 		// atualiza variaveis (remove variaveis que não estão no conjunto dado)
 		void atualiza_variaveis( const std::set<int>& v1 );
 		void atualiza_terminais( const std::set<int>& t1 ); 
-		// enumerador para o estado de leitura
-		enum Estado {
-			INICIO,
-			TERMINAIS,
-			VARIAVEIS,
-			INICIAL,
-			REGRAS,
-		};
+		// cria variavel auxiliar
+		int variavel_auxiliar( std::string nome_base );
+		///// VARIAVEIS PRIVADAS /////
 		// contador de terminais e variaveis
 		int _term_contador = 0;
 		int _vars_contador = 0;

@@ -39,8 +39,8 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 		std::regex re_estado_variaveis{"\\s*#Variaveis.*"};
 		std::regex re_estado_inicial{"\\s*#Inicial.*"};
 		std::regex re_estado_regras{"\\s*#Regras.*"};
-		std::regex re_simbolo{"\\[\\s*([\\w]+)\\s*\\]*"};
-		std::regex re_regra{"\\s*\\[\\s*([\\w]+)\\s*\\]\\s*>\\s*([^#]+)"};
+		std::regex re_simbolo{"\\[\\s*([\\S]+)\\s*\\]*"};
+		std::regex re_regra{"\\s*\\[\\s*([\\S]+)\\s*\\]\\s*>\\s*([^#]+)"};
 
 		std::smatch m;
 		Estado estado = Estado::INICIO;
@@ -461,6 +461,109 @@ void GLC::remove_simb_inuteis() {
 
 }
 
+/////////////// NORMALIZAÇÃO /////////////////////
+
+// converte para forma normal de Chomsky
+bool GLC::normaliza() {
+	// verifica arquivo aberto
+	if( !_aberto ) {
+		std::cout << "ERRO: nenhum GLC aberto para simplificação.\n";
+		return false;
+	}
+
+	// etapa 1: normalizar
+	simplifica();
+
+	// etapa 2: substituir terminais em produçoes >= 2
+
+	std::map<int,int> term_prod; // producoes de terminais (evita repetições)
+
+	// P1
+	std::map<int,std::set<std::vector<int>>> producoes_p1;
+
+	// para cada variavel com produções
+	for( const auto& producoes : _regras ) {
+		// para cada produção
+		for( const auto& prod : producoes.second ) {
+			// se for maior ou igual a 2
+			if( prod.size() >= 2 ) {
+				// producao atualizada
+				std::vector<int> prod_atualizada;
+				// para cada simbolo
+				for( auto simbolo : prod ) {
+					// se for terminal
+					if( simbolo < 0 ) {
+						// checa se producao de terminal não existe
+						if( term_prod.count(simbolo) == 0 ) {
+							// cria variavel auxiliar
+							term_prod[simbolo] = variavel_auxiliar("T_"+_int_para_term[simbolo]);
+						}
+						// adiciona variavel substituta
+						prod_atualizada.push_back(term_prod[simbolo]);
+					} else {
+						// adiciona varivel
+						prod_atualizada.push_back(simbolo);
+					}
+				}
+				// adiciona producão modificada
+				producoes_p1[producoes.first].insert(prod_atualizada);
+			} else {
+				// se não adiciona sem nehuma mudança
+				producoes_p1[producoes.first].insert(prod);
+			}
+		}
+	}
+	// adiciona novas produções de terminais
+	for( const auto& nova_prod : term_prod ) {
+		producoes_p1[nova_prod.second].insert({nova_prod.first});
+	}
+
+	// Etapa 3: substituir pares de variaveis nas produções >= 3
+	std::map<std::vector<int>,int> par_prod; // producoes de pares de variaveis (evita repetições)
+
+	// P2
+	std::map<int,std::set<std::vector<int>>> producoes_p2;
+
+	// para cada variavel
+	for( const auto& producoes : producoes_p1 ) {
+		// para cada producão
+		for( const auto& prod : producoes.second ) {
+			// se for maior ou igual a 3
+			if( prod.size() >= 3 ) {
+				int cabeca_atual = producoes.first;
+				for( int i=0; i<prod.size()-1; i++ ) {
+					// pega sufixo
+					std::vector<int> sufixo{prod.begin()+i+1, prod.end()};
+					// se for par final apenas cria transição para ele e termina
+					if( sufixo.size() == 1 ) {
+						producoes_p2[cabeca_atual].insert({prod[i],prod[i+1]});
+						break;
+					}
+					// se produção para sufixo já existe usa e termina
+					if( par_prod.count(sufixo) != 0 ) {
+						producoes_p2[cabeca_atual].insert({prod[i],par_prod[sufixo]});
+						break;
+					}
+					// se não cria par e variavel auxiliar continua
+					int nova_var = variavel_auxiliar("Aux");
+					producoes_p2[cabeca_atual].insert({prod[i],nova_var});
+					par_prod[sufixo] = nova_var;
+					cabeca_atual = nova_var;
+				}
+			} else {
+				// se for < 3 adiciona sem mudança
+				producoes_p2[producoes.first].insert(prod);
+			}
+		}
+	}
+
+
+	// atualiza regras
+	_regras = producoes_p2;
+
+
+	return true;
+}
 
 //////////////// AUXILIARES /////////////////////
 
@@ -517,4 +620,29 @@ void GLC::atualiza_terminais( const std::set<int>& t1 ) {
 			term++;
 		}
 	}
+}
+
+// cria variavel auxiliar
+int GLC::variavel_auxiliar( std::string nome_base ) {
+	// procura novo nome
+	int n = 0;
+	if( _var_para_int.count(nome_base) != 0 ) {
+		n = 1;
+		while( _var_para_int.count(nome_base+std::to_string(n)) != 0 ) {
+			n++;
+		}
+	}
+	std::string nova_var_str;
+	if( n==0 ) {
+		nova_var_str = nome_base;
+	} else {
+		nova_var_str = nome_base+std::to_string(n);
+	}
+	// adicona
+	int nova_var_int = _vars_contador++;
+	_int_para_var[nova_var_int] = nova_var_str;
+	_var_para_int[nova_var_str] = nova_var_int;
+	_variaveis.insert(nova_var_int);
+
+	return nova_var_int;
 }

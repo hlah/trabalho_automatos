@@ -1,0 +1,16 @@
+#Terminais
+[ x ]
+[ * ]
+[ + ]
+[ [ ]
+[ ] ]
+#Variaveis
+[ E ]
+#Inicial
+[ E ]
+#Regras
+[ E ] > [ E ] [ + ] [ E ]
+[ E ] > [ E ] [ * ] [ E ]
+[ E ] > [ [ ] [ E ] [ ] ]
+[ E ] > [ x ]
+

@@ -29,7 +29,9 @@ int main(int argc, char** argv) {
 	
 
 	// normaliza
-	
+	if( opts.normalizar() ) {
+		glc.normaliza();
+	}
 
 	// exibe gramática
 	if( glc.aberto() && opts.exibir() ) {
