@@ -340,7 +340,7 @@ void GLC::remove_subst_vars() {
 		// adiciona transicoes A -> B
 		for( const auto& prod : _regras[A] ) {
 			// se produção é da for A -> B
-			if( prod.size() == 1 && prod[0] >= 0 ) {
+			if( prod.size() == 1 && prod[0] >= 0 && prod[0] != A) {
 				// adicina ao fecho
 				fechos[A].insert(prod[0]);
 			}
