@@ -15,7 +15,6 @@ int main(int argc, char** argv) {
 		opts.uso();
 	}
 
-
 	GLC glc;
 
 	// carrega gramática
@@ -23,18 +22,17 @@ int main(int argc, char** argv) {
 		glc.carrega_arquivo(opts.glc_entrada());
 	}
 	// simplifica
-	if( opts.simplificar() ) {
+	if( opts.simplificar() && !opts.normalizar() ) {
 		glc.simplifica();
 	}
 	
-
 	// normaliza
 	if( opts.normalizar() ) {
 		glc.normaliza();
 	}
 
 	// exibe gramática
-	if( glc.aberto() && opts.exibir() ) {
+	if( glc.aberto() && opts.exibir() && !opts.simplificar() && !opts.normalizar() ) {
 		glc.exibe();
 	}
 	

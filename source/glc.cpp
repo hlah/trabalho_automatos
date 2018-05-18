@@ -236,12 +236,19 @@ bool GLC::simplifica() {
 		std::cout << "ERRO: nenhum GLC aberto para simplificação.\n";
 		return false;
 	}
+	std::cout << "Simplificando a gramatica...\n";
 	// etapa 1
 	remove_prod_vazias();
+	std::cout << "Gramatica apos etapa 1 da simplificacao (remocao de producoes vazias):\n";
+	exibe();
 	// etapa 2
 	remove_subst_vars();
+	std::cout << "Gramatica apos etapa 2 da simplificacao (removcao de substituicao de variaveis):\n";
+	exibe();
 	// etapa 3
 	remove_simb_inuteis();
+	std::cout << "Gramatica apos etapa 3 da simplificacao (remocao de simbolos inuteis):\n";
+	exibe();
 
 	return true;
 }
@@ -477,9 +484,13 @@ bool GLC::normaliza() {
 		return false;
 	}
 
+	std::cout << "Etapa 1 da normalização: simplificao...\n";
+
+
 	// etapa 1: normalizar
 	simplifica();
 
+	std::cout << "Etapa 2 da normalização: substituir terminais em peoducoes >= 2...\n";
 	// etapa 2: substituir terminais em produçoes >= 2
 
 	std::map<int,int> term_prod; // producoes de terminais (evita repetições)
@@ -523,8 +534,13 @@ bool GLC::normaliza() {
 	for( const auto& nova_prod : term_prod ) {
 		producoes_p1[nova_prod.second].insert({nova_prod.first});
 	}
+	_regras = producoes_p1;
+	
+	exibe();
 
 	// Etapa 3: substituir pares de variaveis nas produções >= 3
+	std::cout << "Etapa 3 da normalização: substituir variaveis por pares em producoes >= 3...\n";
+
 	std::map<std::vector<int>,int> par_prod; // producoes de pares de variaveis (evita repetições)
 
 	// P2
@@ -566,6 +582,8 @@ bool GLC::normaliza() {
 
 	// atualiza regras
 	_regras = producoes_p2;
+
+	exibe();
 
 
 	return true;
