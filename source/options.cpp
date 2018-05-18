@@ -63,7 +63,7 @@ void Options::uso() {
 	std::cout << "\tglc arquivo_de_entrada [opcoes]\n";
 	std::cout << "opcoes:\n";
 	std::cout << " -p\texibe definição formal da gramática.\n";
-	std::cout << " -s\tsimplifica a gramática. (nao implementado)\n";
-	std::cout << " -n\tnormaliza gramática para forma normal de Chomsky. (nao implementado)\n\n";
+	std::cout << " -s\tsimplifica a gramática.\n";
+	std::cout << " -n\tnormaliza gramática para forma normal de Chomsky.\n\n";
 	std::cout << " -v [arquivo]\tverifica se palavra no arquivo dado pertence a linguagem da gramática. (nao implementado)\n\n";
 }

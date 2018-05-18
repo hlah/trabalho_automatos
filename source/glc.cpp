@@ -187,13 +187,19 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 void GLC::exibe() {
 	std::cout << "GLC = (T, V, S, P)\nT = { ";
 	// exibe terminais
-	for( auto term : _terminais ) {
-		std::cout << _int_para_term[term] << ", ";
+	for( auto term_it = _terminais.begin(); term_it != _terminais.end(); term_it++) {
+		if( term_it != _terminais.begin() )
+			std::cout << ", " << _int_para_term[*term_it];
+		else 
+			std::cout << _int_para_term[*term_it];
 	}
 	std::cout << "}\nV = { ";
 	// exibe variaveis
-	for( auto var : _variaveis ) {
-		std::cout << _int_para_var[var] << ", ";
+	for( auto var_it = _variaveis.begin(); var_it != _variaveis.end(); var_it++) {
+		if( var_it != _variaveis.begin() )
+			std::cout << ", " << _int_para_var[*var_it];
+		else 
+			std::cout << _int_para_var[*var_it];
 	}
 	std::cout << "}\nS = ";
 	// exibe inicial
