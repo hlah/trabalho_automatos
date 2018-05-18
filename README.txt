@@ -14,6 +14,6 @@ glc arquivo_de_entrada [arquivo_de_saida] [opcoes]
 
 opções:
  -p	exibe definição formal da gramática.
- -s	simplifica a gramática. (nao implementado)
- -n	normaliza gramática para forma normal de Chomsky. (nao implementado)
+ -s	simplifica a gramática.
+ -n	normaliza gramática para forma normal de Chomsky.
  -v [arquivo]	verifica se palavra no arquivo dado pertence a linguagem da gramática. (nao implementado)
