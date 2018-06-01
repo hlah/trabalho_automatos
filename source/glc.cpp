@@ -151,7 +151,7 @@ bool GLC::carrega_arquivo(std::string arquivo_str) {
 								} else {
 									// checa se é terminal
 									simbolo_it = _term_para_int.find(simbolo);
-									if( simbolo_it != _var_para_int.end() ) {
+									if( simbolo_it != _term_para_int.end() ) {
 										simbolos.push_back(simbolo_it->second);
 									} else {
 										std::cout << "ERRO: símbolo de produção não é terminal, variavel ou símbolo de vazio.\n";
@@ -587,6 +587,137 @@ bool GLC::normaliza() {
 
 
 	return true;
+}
+
+//////////////// VERIFICAÇÃO //////////////////
+
+// verifica se palavra em arquivo pertence a grática
+bool GLC::verifica(std::string str_path) {
+	bool success = true;
+	bool aceita = true;
+
+	std::cout << "Normalizando gramática...\n";
+
+	// primeiro normalza glc
+	normaliza();
+
+	// regex
+	std::regex re_simbolo{"\\[\\s*([\\S]+)\\s*\\]*"};
+
+	std::smatch m;
+
+	// abre arquivo
+	std::ifstream arquivo{str_path};
+	if(arquivo.is_open()) {
+		// obtém símbolos da string
+		std::vector<int> palavra;
+
+		std::cout << "Lendo palavra de entrada...\n";
+		while( !arquivo.eof() ) {
+			std::string linha;
+			std::getline(arquivo, linha);
+
+			// lê linha a linha
+			while( std::regex_search(linha, m, re_simbolo) && aceita ) {
+				auto simbolo = m[1];
+				std::cout << "Lido símbolo: " << simbolo << "\n";
+				// ignora símbolo vazio
+				if( simbolo != _vazio ) {
+					// checa se é terminal
+					auto simbolo_it = _term_para_int.find(simbolo);
+					if( simbolo_it != _term_para_int.end() ) {
+						palavra.push_back(simbolo_it->second);
+					} else {
+						std::cout << "Palavra NÂO aceita: símbolo não pertencente ao alfabeto\n";
+						aceita = false;
+					}
+				}
+				// proximo simbolo
+				linha = m.suffix().str();
+			}
+		}
+
+		// se não recusou já por símbolo não pertencente a linguagem, executa CYK
+		if( aceita ) {
+			///////////////////// CYK //////////////////////
+			
+			// tamanho da palavra
+			int n = palavra.size();
+			
+			// tabela triangular
+			std::vector<std::set<int>> tabela_triangular((n*(n+1))/2);
+
+			// função para obter indice de coordenadas
+			auto get_indice = [n] (int row, int col) -> int {
+				return col+((row-1)*row)/2;
+			};
+
+			//// Etapa 1: variáveis que geram diretamente terminais
+			for( int r=0; r<n; r++ ) {
+				// procura nas produções
+				for( const auto& producoes : _regras ) {
+					for( const auto& producao : producoes.second ) {
+						if( producao.size() == 1 && producao[0] == palavra[r] ) {
+							tabela_triangular[get_indice(n-1, r)].insert(producoes.first);
+							std::cout << _int_para_var.at(producoes.first) << ' ';
+						}
+					}
+				}
+				std::cout << "\n";
+			}
+
+			///// Etapa 2: produções que geram duas variáveis
+			std::cout << "----------------------\n";
+			for( int s=2; s<=n; s++ ) {
+				for( int r=0; r<n-s+1; r++ ) {
+					for( int k=0; k<s-1; k++ ) {
+						// procura nas produções
+						//std::cout << "(" << n-k-1 << ":" << r << "," << n-s+k+1 << ":" << r+k+1 << ")";
+						const auto& v1 = tabela_triangular[get_indice(n-k-1, r)];
+						const auto& v2 = tabela_triangular[get_indice(n-s+k+1, r+k+1)];
+						//std::cout << "{";
+						//for( auto v : v1 ) std::cout << _int_para_var[v] << " ";
+						//std::cout << "}{";
+						//for( auto v : v2 ) std::cout << _int_para_var[v] << " ";
+						//std::cout << "}";
+						for( const auto& producoes : _regras ) {
+							for( const auto& producao : producoes.second ) {
+								if( producao.size() == 2 && 
+									v1.find(producao[0]) != v1.end() &&
+									v2.find(producao[1]) != v2.end()  ) 
+								{
+									//std::cout << _int_para_var.at(producoes.first) << ' ';
+									tabela_triangular[get_indice(n-s, r)].insert(producoes.first);
+								}
+							}
+						}
+						//std::cout << "|";
+					}
+					//std::cout << "\n";
+				}
+				//std::cout << "----------------------\n";
+			}
+
+			///// Etapa 3: condição de aceitação da entrada
+			if( tabela_triangular[0].find(0) == tabela_triangular[0].end() ) {
+				aceita = false;
+			}
+
+
+		}
+		
+	} else {
+		std::cout << "ERRO: não foi possível abrir arquivo da palvara.\n";
+		success = false;
+	}
+
+	if( aceita ) {
+		std::cout << "Palavra ACEITA.\n";
+	} else {
+		std::cout << "Palavra NAO aceita.\n";
+	}
+
+	return success;
 }
 
 //////////////// AUXILIARES /////////////////////

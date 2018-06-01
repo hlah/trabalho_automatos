@@ -38,6 +38,9 @@ int main(int argc, char** argv) {
 	
 
 	// verifica
+	if( glc.aberto() && opts.verificar() ) {
+		glc.verifica(opts.string_entrada());
+	}
 	
 
 

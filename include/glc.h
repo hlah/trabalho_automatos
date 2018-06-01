@@ -24,6 +24,8 @@ class GLC {
 		bool simplificada();
 		// checa se gramática está na forma normal de Chomsky
 		bool normalizada();
+		// verifica se palavra em arquivo pertence a grática
+		bool verifica(std::string str_path);
 	private:
 		///// METODOS PRIVADOS /////
 		//// SIMPLIFICAÇÃO
