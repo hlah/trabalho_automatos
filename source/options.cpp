@@ -64,6 +64,9 @@ void Options::uso() {
 	std::cout << "opcoes:\n";
 	std::cout << " -p\texibe definição formal da gramática.\n";
 	std::cout << " -s\tsimplifica a gramática.\n";
-	std::cout << " -n\tnormaliza gramática para forma normal de Chomsky.\n\n";
-	std::cout << " -v [arquivo]\tverifica se palavra no arquivo dado pertence a linguagem da gramática. (nao implementado)\n\n";
+	std::cout << " -n\tnormaliza gramática para forma normal de Chomsky.\n";
+	std::cout << " -v [arquivo]\tverifica se palavra no arquivo dado pertence a linguagem da gramática\n\n";
+	std::cout << "obs: o arquivo a ser verificado deve estar num formato semelhante ao da\n";
+	std::cout << "gramática, com cada simbolo entre colchetes, exemplo:\n\n";
+	std::cout << "[ simbolo1 ][ simbolo2 ][ simbolo3 ]\n\n";
 }

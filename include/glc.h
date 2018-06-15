@@ -35,6 +35,14 @@ class GLC {
 		void remove_subst_vars();
 		// etapa 3: removção de símbolos inuteis
 		void remove_simb_inuteis();
+		//// VERIFICAÇÂO
+		// função para obter indice de coordenadas de matriz triangular
+		inline int get_indice(int row, int col) const { return col+((row+1)*row)/2; };
+		// imprime arvores de derivação
+		std::vector<std::string> imprime_arvores(const std::vector<std::set<int>>& tabela,
+			   									 const std::vector<int>& palavra,
+												 int depth=0, int var=0,
+												 int row=0, int col=0) const;
 		//// AUXLIARES
 		// remove símbolo (e todas as produções que à contém)
 		void remove_simbolo(int simbolo);

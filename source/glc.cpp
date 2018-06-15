@@ -620,7 +620,7 @@ bool GLC::verifica(std::string str_path) {
 			// lê linha a linha
 			while( std::regex_search(linha, m, re_simbolo) && aceita ) {
 				auto simbolo = m[1];
-				std::cout << "Lido símbolo: " << simbolo << "\n";
+				// std::cout << "Lido símbolo: " << simbolo << "\n";
 				// ignora símbolo vazio
 				if( simbolo != _vazio ) {
 					// checa se é terminal
@@ -647,10 +647,6 @@ bool GLC::verifica(std::string str_path) {
 			// tabela triangular
 			std::vector<std::set<int>> tabela_triangular((n*(n+1))/2);
 
-			// função para obter indice de coordenadas
-			auto get_indice = [n] (int row, int col) -> int {
-				return col+((row-1)*row)/2;
-			};
 
 			//// Etapa 1: variáveis que geram diretamente terminais
 			for( int r=0; r<n; r++ ) {
@@ -659,43 +655,47 @@ bool GLC::verifica(std::string str_path) {
 					for( const auto& producao : producoes.second ) {
 						if( producao.size() == 1 && producao[0] == palavra[r] ) {
 							tabela_triangular[get_indice(n-1, r)].insert(producoes.first);
-							std::cout << _int_para_var.at(producoes.first) << ' ';
+							//std::cout << _int_para_var.at(producoes.first) << ' ';
 						}
 					}
 				}
-				std::cout << "\n";
+				// std::cout << "\n";
 			}
 
 			///// Etapa 2: produções que geram duas variáveis
-			std::cout << "----------------------\n";
+			// std::cout << "----------------------\n";
 			for( int s=2; s<=n; s++ ) {
 				for( int r=0; r<n-s+1; r++ ) {
 					for( int k=0; k<s-1; k++ ) {
 						// procura nas produções
-						//std::cout << "(" << n-k-1 << ":" << r << "," << n-s+k+1 << ":" << r+k+1 << ")";
+						// std::cout << "(" << n-k-1 << ":" << r << "," << n-s+k+1 << ":" << r+k+1 << ")";
 						const auto& v1 = tabela_triangular[get_indice(n-k-1, r)];
 						const auto& v2 = tabela_triangular[get_indice(n-s+k+1, r+k+1)];
-						//std::cout << "{";
-						//for( auto v : v1 ) std::cout << _int_para_var[v] << " ";
-						//std::cout << "}{";
-						//for( auto v : v2 ) std::cout << _int_para_var[v] << " ";
-						//std::cout << "}";
+
+						/*
+						std::cout << "{";
+						for( auto v : v1 ) std::cout << _int_para_var[v] << " ";
+						std::cout << "}{";
+						for( auto v : v2 ) std::cout << _int_para_var[v] << " ";
+						std::cout << "}";
+						// */
+
 						for( const auto& producoes : _regras ) {
 							for( const auto& producao : producoes.second ) {
 								if( producao.size() == 2 && 
 									v1.find(producao[0]) != v1.end() &&
 									v2.find(producao[1]) != v2.end()  ) 
 								{
-									//std::cout << _int_para_var.at(producoes.first) << ' ';
+									// std::cout << _int_para_var.at(producoes.first) << ' ';
 									tabela_triangular[get_indice(n-s, r)].insert(producoes.first);
 								}
 							}
 						}
-						//std::cout << "|";
+						// std::cout << "|";
 					}
-					//std::cout << "\n";
+					// std::cout << "\n";
 				}
-				//std::cout << "----------------------\n";
+				// std::cout << "----------------------\n";
 			}
 
 			///// Etapa 3: condição de aceitação da entrada
@@ -703,6 +703,12 @@ bool GLC::verifica(std::string str_path) {
 				aceita = false;
 			}
 
+			// imprime arvores de derivação
+			if( aceita ) {
+				std::cout << "Palavra ACEITA.\n";
+				std::cout << "Arvores de derivação:\n";
+				imprime_arvores(tabela_triangular, palavra);
+			}
 
 		}
 		
@@ -718,6 +724,81 @@ bool GLC::verifica(std::string str_path) {
 	}
 
 	return success;
+}
+
+// imprime arvores de derivação
+std::vector<std::string> GLC::imprime_arvores(const std::vector<std::set<int>>& tabela,
+											  const std::vector<int>& palavra, 
+											  int depth, int var,
+											  int row, int col) const 
+{
+	int n = palavra.size();
+	std::vector<std::string> arvores;
+
+	std::string tabs;
+	for( int i=0; i<depth; i++ ) {
+		tabs += "\t";
+	}
+	//std::cout << row << ":" << col << "\n";
+
+	// achou variavel que deriva terminal
+	if( row == n-1 ) {
+		arvores.push_back(tabs + _int_para_var.at(var) + "\n\t" + tabs + _int_para_term.at(palavra[col]) + "\n");
+	// variaveis que derivam duas variaveis
+	} else {
+		for( int k=n-1; k>row; k--) {
+			//std::cout << k << " " << col << " -- " << row+n-k << " " << col+n-k << "\n";
+			const auto& v1 = tabela.at(get_indice(k, col));
+			const auto& v2 = tabela.at(get_indice(row+n-k, col+n-k));
+
+			/*
+			std::cout << "v1: { ";
+			for( auto v : v1 ) {
+				std::cout << _int_para_var.at(v) << ' ';
+			}
+			std::cout << "}\nv2: { ";
+			for( auto v : v2 ) {
+				std::cout << _int_para_var.at(v) << ' ';
+			}
+			std::cout << "}\n";
+			// */
+
+			for( const auto& producao : _regras.at(var) ) {
+				if( producao.size() == 2 && v1.count(producao[0])>0 && v2.count(producao[1])>0 ) {
+					//std::cout << _int_para_var.at(var) << " -> " << _int_para_var.at(producao[0]) << " " << _int_para_var.at(producao[1]) << "\n";
+					//std::cout << " ----> ";
+					// obtém sub-arvores
+					auto sub_arvores_v1 = imprime_arvores(tabela, palavra, depth+1, producao[0], k, col);
+					auto sub_arvores_v2 = imprime_arvores(tabela, palavra, depth+1, producao[1], row+n-k, col+n-k);
+					// adiciona sub-arvores
+					for( auto sub_v1 : sub_arvores_v1 ) {
+						for( auto sub_v2 : sub_arvores_v2 ) {
+							std::string arvore_str = tabs + _int_para_var.at(var) + "\n";
+							arvore_str += sub_v1;
+							arvore_str += sub_v2;
+							arvores.push_back(arvore_str);
+						}
+					}
+
+				} 
+
+				/*
+				if( producao.size() == 2 )
+					std::cout << "\t" << _int_para_var.at(var) << " -> " << _int_para_var.at(producao[0]) << " " << _int_para_var.at(producao[1]) << "\n";
+				// */
+			}
+		}
+	}
+
+	//std::cout << arvores.size() << " arvores de derivação: \n";
+	if( depth == 0 )  {
+		for( auto arvore : arvores ) {
+			std::cout << arvore;
+		}
+	}
+
+	return arvores;
+
 }
 
 //////////////// AUXILIARES /////////////////////
